@@ -1,19 +1,28 @@
+from ..BaseResource import BaseResource
 import boto3
 
-class Resource:
+class Resource(BaseResource):
     name = 'kms'
     type = 'kms'
+    client = None
+    ids = []
+
+    def __init__(self):
+        self.client = boto3.client(self.type)
 
     def get_resources(self):
-        client = boto3.client(self.type)
+        client = self.client
         resources = client.list_aliases()
         ids = []
         for resource in resources['Aliases']:
             # for instance in page['Reservations']:
-                ids.append(resource['AliasArn'])
+                self.ids.append(resource['AliasArn'])
 
-        return ids
+        return self.ids
 
     def list_resources(self):
-        pass
+        pprint()
+
+    def delete_resources(self, ids):
+        print('not implemented')
 

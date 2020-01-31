@@ -47,7 +47,9 @@ def get_args():
 
 def main(config_file):
     aws_reset_account = AWSResetAccount.AWSResetAccount(config_file)
+    aws_reset_account.dry_run = True
     aws_reset_account.delete_resources()
+    # aws_reset_account.delete_resources_by_type('ec2')
 
 
 if __name__ == "__main__":
