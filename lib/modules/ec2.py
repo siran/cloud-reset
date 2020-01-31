@@ -5,7 +5,9 @@ class Resource(BaseResource):
     name = 'ec2'
     type = 'ec2'
     client = None
+    dry_run = True
     ids = []
+    resources = []
 
     def __init__(self):
         self.client = boto3.client(self.type)
@@ -18,6 +20,9 @@ class Resource(BaseResource):
                 for instance in reservation["Instances"]:
                     if instance.get('InstanceId'):
                         self.ids.append(instance['InstanceId'])
+                        self.resources.append({
+                            "id": instance['InstanceId'],
+                        })
 
         return self.ids
 

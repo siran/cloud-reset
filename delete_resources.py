@@ -27,11 +27,14 @@ from lib import AWSResetAccount #import AWSResetAccount
 def get_args():
     parser = argparse.ArgumentParser(description='Description')
 
-    parser.add_argument("-f", "--file", default=None,
-                    help="Specify YAML file where resources are to be processed")
+    parser.add_argument("-f", "--file", default=None, required=True,
+                    help="Specify YAML file where resources are to be processed.")
+
+    parser.add_argument("-x", "--execute", default=False, action='store_true',
+                    help="Turn off dryrun flag.")
 
     parser.add_argument("-d", "--debug_options", action='store_true',
-                    help="Debug options passed and exit")
+                    help="Debug options passed and exit.")
 
     args = parser.parse_args()
 
@@ -47,7 +50,7 @@ def get_args():
 
 def main(config_file):
     aws_reset_account = AWSResetAccount.AWSResetAccount(config_file)
-    aws_reset_account.dry_run = True
+    aws_reset_account.dry_run = args.execute == False
     aws_reset_account.delete_resources()
     # aws_reset_account.delete_resources_by_type('ec2')
 
