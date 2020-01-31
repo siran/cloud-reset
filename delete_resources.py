@@ -47,7 +47,7 @@ def get_args():
 
 def main(config_file):
     aws_reset_account = AWSResetAccount.AWSResetAccount(config_file)
-    aws_reset_account.list_resources()
+    aws_reset_account.delete_resources()
 
 
 if __name__ == "__main__":

@@ -10,10 +10,17 @@ class Resource(BaseResource):
         paginator = client.get_paginator('describe_instances')
         ids = []
         for page in paginator.paginate():
-            for instance in page['Reservations']:
-                ids.append(instance['InstanceId'])
+            for reservation in page['Reservations']:
+                for instance in reservation["Instances"]:
+                    if instance.get('InstanceId'):
+                        ids.append(instance['InstanceId'])
 
         return ids
 
     def list_resources(self):
+        # ids = self.get_resources()
+        # print(ids)
+        pass
+
+    def delete_resources(self):
         pass
