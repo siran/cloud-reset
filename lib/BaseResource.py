@@ -27,10 +27,6 @@ class BaseResource(abc.ABC):
         raise NotImplementedError
 
     @property
-    def ids(self):
-        raise NotImplementedError
-
-    @property
     def resources(self):
         raise NotImplementedError
 

@@ -21,7 +21,6 @@ class AWSResetAccount:
     configuration = None
 
     resource_instances = {}
-    resource_ids = {}
     resources = {}
 
     # set to True for security
@@ -70,12 +69,10 @@ class AWSResetAccount:
             return
 
         resource_instance.get_resources()
-        self.resources[resource_type] = resource_instance.resources or []
-        self.resource_ids[resource_type] = resource_instance.ids or []
+
+        self.resources[resource_type] = resource_instance.resources
 
         self.filter_resources_by_type(resource_type)
-
-        return resource_instance.ids or []
 
     def get_resources(self):
         """ Gets all the resource ids defined in the configuration file"""
@@ -93,14 +90,13 @@ class AWSResetAccount:
         # if not self.resource_instances.get(resource_type):
         #     self.instantiate_resource(resource_type)
         # pprint(self.resources[resource_type])
-        # pprint(self.resource_ids[resource_type])
         resources = self.resources[resource_type]
         configuration = self.configuration[resource_type]
         for filter_dict in configuration:
             for filter_type, filter_options in filter_dict.items():
-                getattr(self, f"filter_{filter_type.lower()}")(resources=resources, filter_options=filter_options)
-                sys.exit()
+                resources = getattr(self, f"filter_{filter_type.lower()}")(resources = resources, filter_options = filter_options)
 
+        self.resources[resource_type] = resources
 
 
     def filter_exclude(self, filter_options, resources):
@@ -108,22 +104,30 @@ class AWSResetAccount:
 
         for filter_option in filter_options:
             for filter_key, filter_value in filter_option.items():
-                self.exclude_by_name(filter_value, resources)
-                filter(self.exclude_by_name, resources)
-                sys.exit()
+                # self.exclude_by_name(filter_value, resources)/
+                filter_field = filter_key
+                filter_fn = functools.partial(
+                    getattr(self, f"filter_by"),
+                    filter_value=filter_value,
+                    filter_field = filter_field)
 
+                resources = list(filter(filter_fn, resources))
 
-    def exclude_by_name(self, filter_expr, resource):
-        """ filter a list of resources by Name """
-        print(resource)
-        print(filter_expr)
-        sys.exit()
+        return resources
+
+    def filter_by(self, resource, filter_value, filter_field):
+        """ Returns True/False if resource[filter_field] matches regex `filter_value`. """
+
+        if filter_value[0] == '/' and filter_value[-1] == '/':
+            expr = filter_value[1:-1]
+            return not bool(re.search(expr, resource['Name']))
+
 
     def list_resources(self):
         """ Pretty print the resource ids that would be deleted """
 
         self.get_resources()
-        pprint(self.resource_ids)
+        pprint(self.resources)
 
     def confirm(self):
         while True:
@@ -140,11 +144,11 @@ class AWSResetAccount:
         self.get_resources_by_type(resource_type)
         resource_instance = self.resource_instances[resource_type]
         print('Resources to be deleted')
-        pprint(self.resource_ids[resource_type])
+        pprint(self.resources[resource_type])
         if not self.dry_run:
             if self.confirm():
                 resource_instance.delete_resources(
-                    self.resource_ids[resource_type]
+                    self.resources[resource_type]
                 )
             else:
                 print(f'Not deleting {resource_type}...')

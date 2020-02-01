@@ -7,7 +7,6 @@ class Resource(BaseResource):
     client = None
     dry_run = True
     configuration = {}
-    ids = []
     resources = []
 
     def __init__(self):
@@ -18,7 +17,6 @@ class Resource(BaseResource):
         response = client.list_buckets()
         for resource in response['Buckets']:
             # for instance in page['Reservations']:
-                self.ids.append(resource['Name'])
                 self.resources.append({
                     "Name": resource['Name'],
                 })
@@ -26,9 +24,10 @@ class Resource(BaseResource):
         return self.resources
 
     def list_resources(self):
-        pprint()
+        pprint(self.resources)
 
-    def delete_resources(self, ids):
-        print(self.configuration)
-        for resource_id in self.ids:
-            print(f'Delete {resource_id}')
+    def delete_resources(self, resources):
+        for resource in resources:
+            bucket_name = resource['Name']
+            print(f"Delete {bucket_name}")
+            response = self.client.delete_bucket(Bucket=bucket_name)
