@@ -5,7 +5,9 @@ class Resource(BaseResource):
     name = 'aws_kms'
     type = 'kms'
     client = None
-    ids = []
+    dry_run = True
+    configuration = {}
+    resources = []
 
     def __init__(self):
         self.client = boto3.client(self.type)
@@ -16,13 +18,15 @@ class Resource(BaseResource):
         ids = []
         for resource in resources['Aliases']:
             # for instance in page['Reservations']:
-                self.ids.append(resource['AliasArn'])
+                self.resources.append({
+                    "AliasArn": resource['AliasArn'],
+                })
 
-        return self.ids
+        return self.resources
 
     def list_resources(self):
-        pprint()
+        pprint(self.resources)
 
-    def delete_resources(self, ids):
+    def delete_resources(self, resources, options={}):
         print('not implemented')
 

@@ -41,9 +41,10 @@ class CloudReset:
 
         for block in self.configuration:
             resource_type, options = list(block.items())[0]
+            options = options or {}
             self.delete_resources_by_type(resource_type, options)
 
-        sys.exit()
+        print('Finished run!')
 
     def get_resource_instance(self, resource_type):
         """ Instantiate the class that manages a certain resource type """
@@ -79,7 +80,8 @@ class CloudReset:
         resource_instance.get_resources()
 
         self.resources = resource_instance.resources
-        self.filter_resources(options)
+        if options:
+            self.filter_resources(options)
 
     def get_resources(self):
         """ Gets all the resource ids defined in the configuration file"""
@@ -91,13 +93,15 @@ class CloudReset:
             if not resources:
                 print(f'Resources of type {resource_type} could not be loaded')
 
-    def filter_resources(self, filter_obj):
+    def filter_resources(self, filter_obj={}):
         """ Calls filter functions for resources of type"""
 
         resources = self.resources
         filter_types = ['exclude']
         for filter_type in filter_types:
             filters = filter_obj.get(filter_type)
+            if not filters:
+                continue
             filter_fn = f"filter_{filter_type}"
             if not hasattr(self, filter_fn):
                 raise NotImplementedError(f"Filter of type {filter_type} has not been implemented.")
@@ -146,12 +150,16 @@ class CloudReset:
                 return ans.lower() == 'y'
                 break
 
-    def delete_resources_by_type(self, resource_type, options = {}):
+    def delete_resources_by_type(self, resource_type, options={}):
         """ Trigger the deletion of the `resource_type` """
 
         self.get_resources_by_type(resource_type, options)
         resource_instance = self.resource_instances[resource_type]
-        print('Resources to be deleted')
+        if len(self.resources) == 0:
+            print(f'{resource_type}: No resources to be deleted')
+            return
+
+        print(f'{resource_type}: Resources to be deleted:')
         pprint(self.resources)
         if not self.dry_run:
             if self.confirm():
