@@ -46,6 +46,14 @@ No tests yet.
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
+## Similar project
+
+Some similar projects:
+
+- cloud-sweeper: https://github.com/getify/cloud-sweeper
+- cloud-nuke: https://github.com/getify/cloud-sweeper
+- aws-auto-cleanup: https://github.com/servian/aws-auto-cleanup
+- gcloud-cleanup: https://github.com/travis-ci/gcloud-cleanup
 
 ## License
 
