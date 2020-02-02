@@ -1,16 +1,17 @@
-# AWS Reset Account
+# Cloud-Reset
 
-Deletes all resources from a AWS account.
+Deletes resources from a Cloud provider account.
 Resources to be deleted are specified in a YAML file, like
 
 ```
-- ec2:
-- s3:
+- aws_ec2:
+- aws_s3:
     exclude:
-        - Name: /-terraform-/
+        - Name: /-terraform-/ # regular expression
         - Name: /-xxx-/
     options:
-        force: true
+        force: true           # deletes bucket contents
+- aws_kms:
 ```
 
 ## Getting Started
