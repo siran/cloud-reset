@@ -1,5 +1,6 @@
-s3:
-    - exclude:
+- s3:
+    exclude:
         - Name: /-terraform-/
         - Name: /-xxx-/
-
+    options:
+        force: true

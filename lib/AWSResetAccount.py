@@ -31,12 +31,11 @@ class AWSResetAccount:
         self.load_configuration()
 
     def load_configuration(self):
-        """ loads the .yml file where resources to be deleted are defined """
+        """ Loads the .yml file where resources to be deleted are defined """
 
         with open(self.config_file) as fh:
             self.configuration = yaml.load(fh, Loader=yaml.FullLoader)
 
-    def instantiate_resource(self, resource_type):
     def run(self):
         """ Run the configuration """
 
@@ -46,7 +45,11 @@ class AWSResetAccount:
 
         sys.exit()
 
+    def get_resource_instance(self, resource_type):
         """ Instantiate the class that manages a certain resource type """
+
+        if self.resource_instances.get(resource_type):
+            return self.resource_instances.get(resource_type)
 
         module_name = ".".join(['lib','modules',resource_type])
         try:
@@ -59,7 +62,6 @@ class AWSResetAccount:
         try:
             resource_instance = resource_class()
             resource_instance.dry_run = self.dry_run
-            resource_instance.configuration = self.configuration[resource_type]
         except TypeError as error:
             print(f'Error instantiating class {module_name}: {error.args[0]}')
             return
@@ -67,21 +69,17 @@ class AWSResetAccount:
         self.resource_instances[resource_type] = resource_instance
         return resource_instance
 
-    def get_resources_by_type(self, resource_type):
-        """ Gets all the resource ids for a given type of resource """
+    def get_resources_by_type(self, resource_type, options = {}):
+        """ Gets resources of a given type and applies filters and other options """
 
-        if not self.resource_instances.get(resource_type):
-            self.instantiate_resource(resource_type)
-
-        resource_instance = self.resource_instances.get(resource_type)
+        resource_instance = self.get_resource_instance(resource_type)
         if not resource_instance:
             return
 
         resource_instance.get_resources()
 
-        self.resources[resource_type] = resource_instance.resources
-
-        self.filter_resources_by_type(resource_type)
+        self.resources = resource_instance.resources
+        self.filter_resources(options)
 
     def get_resources(self):
         """ Gets all the resource ids defined in the configuration file"""
@@ -93,34 +91,33 @@ class AWSResetAccount:
             if not resources:
                 print(f'Resources of type {resource_type} could not be loaded')
 
-    def filter_resources_by_type(self, resource_type):
+    def filter_resources(self, filter_obj):
         """ Calls filter functions for resources of type"""
 
-        # if not self.resource_instances.get(resource_type):
-        #     self.instantiate_resource(resource_type)
-        # pprint(self.resources[resource_type])
-        resources = self.resources[resource_type]
-        configuration = self.configuration[resource_type]
-        for filter_dict in configuration:
-            for filter_type, filter_options in filter_dict.items():
-                resources = getattr(self, f"filter_{filter_type.lower()}")(resources = resources, filter_options = filter_options)
+        resources = self.resources
+        filter_types = ['exclude']
+        for filter_type in filter_types:
+            filters = filter_obj.get(filter_type)
+            filter_fn = f"filter_{filter_type}"
+            if not hasattr(self, filter_fn):
+                raise NotImplementedError(f"Filter of type {filter_type} has not been implemented.")
+            for filter_expr in filters:
+                resources = getattr(self, filter_fn)(resources = resources, filter_expr = filter_expr)
 
-        self.resources[resource_type] = resources
+        self.resources = resources
 
-
-    def filter_exclude(self, filter_options, resources):
+    def filter_exclude(self, filter_expr, resources):
         """ excludes resources by filter options """
 
-        for filter_option in filter_options:
-            for filter_key, filter_value in filter_option.items():
-                # self.exclude_by_name(filter_value, resources)/
-                filter_field = filter_key
-                filter_fn = functools.partial(
-                    getattr(self, f"filter_by"),
-                    filter_value=filter_value,
-                    filter_field = filter_field)
+        for filter_key, filter_value in filter_expr.items():
+            # self.exclude_by_name(filter_value, resources)/
+            filter_field = filter_key
+            filter_fn = functools.partial(
+                getattr(self, f"filter_by"),
+                filter_value=filter_value,
+                filter_field = filter_field)
 
-                resources = list(filter(filter_fn, resources))
+            resources = list(filter(filter_fn, resources))
 
         return resources
 
@@ -130,6 +127,8 @@ class AWSResetAccount:
         if filter_value[0] == '/' and filter_value[-1] == '/':
             expr = filter_value[1:-1]
             return not bool(re.search(expr, resource['Name']))
+        else:
+            return expr != resource['Name']
 
 
     def list_resources(self):
@@ -147,24 +146,25 @@ class AWSResetAccount:
                 return ans.lower() == 'y'
                 break
 
-    def delete_resources_by_type(self, resource_type):
-        """ Deletes the resource ids """
+    def delete_resources_by_type(self, resource_type, options = {}):
+        """ Trigger the deletion of the `resource_type` """
 
-        self.get_resources_by_type(resource_type)
+        self.get_resources_by_type(resource_type, options)
         resource_instance = self.resource_instances[resource_type]
         print('Resources to be deleted')
-        pprint(self.resources[resource_type])
+        pprint(self.resources)
         if not self.dry_run:
             if self.confirm():
                 resource_instance.delete_resources(
-                    self.resources[resource_type]
+                    resources=self.resources,
+                    options = options.get('options')
                 )
             else:
                 print(f'Not deleting {resource_type}...')
         else:
             print('Dry run flag set. Not deleting anything.')
 
-    def delete_resources(self):
-        resources = list(self.configuration.keys())
-        for resource_type in resources:
-            self.delete_resources_by_type(resource_type)
+    # def delete_resources(self):
+    #     resources = list(self.configuration.keys())
+    #     for resource_type in resources:
+    #         self.delete_resources_by_type(resource_type)
