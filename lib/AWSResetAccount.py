@@ -37,6 +37,15 @@ class AWSResetAccount:
             self.configuration = yaml.load(fh, Loader=yaml.FullLoader)
 
     def instantiate_resource(self, resource_type):
+    def run(self):
+        """ Run the configuration """
+
+        for block in self.configuration:
+            resource_type, options = list(block.items())[0]
+            self.delete_resources_by_type(resource_type, options)
+
+        sys.exit()
+
         """ Instantiate the class that manages a certain resource type """
 
         module_name = ".".join(['lib','modules',resource_type])
