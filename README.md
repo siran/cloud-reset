@@ -2,9 +2,15 @@
 
 Deletes all resources from a AWS account.
 Resources to be deleted are specified in a YAML file, like
+
 ```
-ec2:
-kms:
+- ec2:
+- s3:
+    exclude:
+        - Name: /-terraform-/
+        - Name: /-xxx-/
+    options:
+        force: true
 ```
 
 ## Getting Started
