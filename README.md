@@ -17,7 +17,7 @@ Resources to be deleted are specified in a YAML file, like
 
 Clone the repo
 ```
-git clone git@github.com:siran/aws_reset_account.git
+git clone git@github.com:siran/cloud-reset.git
 ```
 
 ### Prerequisites
