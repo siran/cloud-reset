@@ -19,7 +19,7 @@ Executing `python delete_resources.py -f example.yml` would delete all EC2 insta
 import argparse
 import sys
 
-from lib import AWSResetAccount #import AWSResetAccount
+from lib.CloudReset import CloudReset
 #import re
 #from pprint import pprint
 
@@ -49,9 +49,9 @@ def get_args():
     return args
 
 def main(config_file):
-    aws_reset_account = AWSResetAccount.AWSResetAccount(config_file)
-    aws_reset_account.dry_run = args.execute == False
-    aws_reset_account.run()
+    cloud_reset = CloudReset(config_file)
+    cloud_reset.dry_run = args.execute == False
+    cloud_reset.run()
 
 if __name__ == "__main__":
     args = get_args()

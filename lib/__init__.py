@@ -1,1 +1,1 @@
-from . import AWSResetAccount
+from . import CloudReset

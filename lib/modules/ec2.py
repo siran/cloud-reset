@@ -2,7 +2,7 @@ from ..BaseResource import BaseResource
 import boto3
 
 class Resource(BaseResource):
-    name = 'ec2'
+    name = 'aws_ec2'
     type = 'ec2'
     client = None
     dry_run = True

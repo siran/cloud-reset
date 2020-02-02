@@ -2,7 +2,7 @@ from ..BaseResource import BaseResource
 import boto3
 
 class Resource(BaseResource):
-    name = 's3'
+    name = 'aws_s3'
     type = 's3'
     client = None
     dry_run = True

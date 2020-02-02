@@ -1,3 +1,3 @@
-ec2:
-kms:
+aws_ec2:
+aws_kms:
 

@@ -1,4 +1,4 @@
-- s3:
+- aws_s3:
     exclude:
         - Name: /-terraform-/
         - Name: /-xxx-/

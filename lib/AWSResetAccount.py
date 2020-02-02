@@ -13,7 +13,7 @@ import sys
 import warnings
 from pprint import pprint
 
-class AWSResetAccount:
+class CloudReset:
     """ Reset an AWS account by deleting all resources specified
     in a YAML configuration file
     """

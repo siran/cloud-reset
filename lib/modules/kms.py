@@ -2,7 +2,7 @@ from ..BaseResource import BaseResource
 import boto3
 
 class Resource(BaseResource):
-    name = 'kms'
+    name = 'aws_kms'
     type = 'kms'
     client = None
     ids = []
