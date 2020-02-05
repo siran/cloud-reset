@@ -41,3 +41,9 @@ class BaseResource(abc.ABC):
     @abc.abstractmethod
     def delete_resources(self):
         pass
+
+    def check_dry_run(self):
+        """ Method inherited by subclasses to check if we're being dry-run """
+        if self.dry_run:
+            print('Dry run set.')
+        return self.dry_run
