@@ -26,7 +26,17 @@ class CloudReset:
     # set to True for security
     dry_run = True
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, args=None):
+        if not args.profile:
+            if (   not os.environ.get("AWS_PROFILE")
+                or os.environ["AWS_PROFILE"] == 'default'
+                or not re.search('^sandbox', os.environ["AWS_PROFILE"])
+            ):
+                print("Refusing to run with an empty or default AWS_PROFILE environment variable.")
+                print("Please specify a value fot the AWS_PROFILE that will be used to delete resources.")
+                print("The profile name must start with the string 'sandbox'.")
+                sys.exit(1)
+
         self.config_file = config_file
         self.load_configuration()
 

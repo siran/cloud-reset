@@ -27,6 +27,9 @@ from lib.CloudReset import CloudReset
 def get_args():
     parser = argparse.ArgumentParser(description='Description')
 
+    parser.add_argument("-p", "--profile", default=None,
+                    help="AWS Profile to assume. Must be typically defined in your ~/.aws/credentials")
+
     parser.add_argument("-f", "--file", default=None, required=True,
                     help="Specify YAML file where resources are to be processed.")
 
@@ -49,8 +52,8 @@ def get_args():
     return args
 
 def main(config_file):
-    cloud_reset = CloudReset(config_file)
-    cloud_reset.dry_run = args.execute == False
+    cloud_reset = CloudReset(config_file, args=args)
+    cloud_reset.dry_run = (args.execute == False)
     cloud_reset.run()
 
 if __name__ == "__main__":
