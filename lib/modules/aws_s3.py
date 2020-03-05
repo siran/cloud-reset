@@ -21,10 +21,14 @@ class Resource(BaseResource):
 
         response = client.list_buckets()
         for resource in response['Buckets']:
-            # for instance in page['Reservations']:
-                self.resources.append({
-                    "Name": resource['Name'],
-                })
+            resource_name = resource['Name']
+            tags = client.get_bucket_tagging(
+                Bucket=resource_name
+            )
+            self.resources.append({
+                "Name": resource_name,
+                "Tags": tags.get("TagSet")
+            })
 
         return self.resources
 

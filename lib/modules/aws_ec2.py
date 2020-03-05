@@ -21,7 +21,8 @@ class Resource(BaseResource):
                     if instance.get('InstanceId'):
                         self.ids.append(instance['InstanceId'])
                         self.resources.append({
-                            "id": instance['InstanceId'],
+                            "Id": instance['InstanceId'],
+                            "Tags": instance.get('Tags'),
                         })
 
         return self.ids

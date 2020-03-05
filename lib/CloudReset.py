@@ -138,12 +138,27 @@ class CloudReset:
     def filter_by(self, resource, filter_value, filter_field):
         """ Returns True/False if resource[filter_field] matches regex `filter_value`. """
 
-        if filter_value[0] == '/' and filter_value[-1] == '/':
-            expr = filter_value[1:-1]
-            return not bool(re.search(expr, resource['Name']))
-        else:
-            return expr != resource['Name']
+        if filter_field == "Name":
+            return not self.match_values(expr, resource['Name'])
+        elif resource.get("Tags") and filter_field == 'Tag':
+            for tag in resource["Tags"]:
+                tag_key = tag["Key"]
+                tag_value = tag["Value"]
+                if filter_value["Key"] == tag_key:
+                    return not self.match_values(filter_value["Value"], tag_value)
+            return False
 
+    def match_values(self, expression, value):
+        """
+        Return True if expression == value
+            expression (str): if enclosed buy "/" it's interpreted as regex
+            value (str): value to compare with
+        """
+        if expression[0] == '/' and expression[-1] == '/':
+            expr = expression[1:-1]
+            return bool(re.search(expr, value))
+        else:
+            return expr == value
 
     def list_resources(self):
         """ Pretty print the resource ids that would be deleted """

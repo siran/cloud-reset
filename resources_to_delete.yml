@@ -1,4 +1,8 @@
 - aws_ec2:
+    exclude:
+        - Tag:
+            Key: Name
+            Value: /test/
 - aws_s3:
     exclude:
         - Name: /-terraform-/
